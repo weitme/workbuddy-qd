@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+env/
+.env
+
+# 含敏感 token，切勿提交；云端从 GitHub Secret 读取
+accounts.json
+签到token.json
+签到工具.exe
+checkin_log.txt
