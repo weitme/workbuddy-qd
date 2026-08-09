@@ -3,8 +3,8 @@ name: WorkBuddy 每日自动签到
 on:
   workflow_dispatch:
   schedule:
-    - cron: '3 4 * * *'    # UTC 04:03 = 北京时间 12:03 首次签到
-    - cron: '4 5 * * *'    # UTC 05:04 = 北京时间 13:04 复查补签
+    - cron: '47 4 * * *'   # UTC 04:47 = 北京时间 12:47 首次签到
+    - cron: '8 5 * * *'    # UTC 05:08 = 北京时间 13:08 复查补签
 
 jobs:
   checkin:
