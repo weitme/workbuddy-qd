@@ -30,7 +30,8 @@ UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
 
 def load_accounts():
     """优先读环境变量 WORKBUDDY_ACCOUNTS，否则退回本地 JSON 文件。"""
-    raw = os.environ.get("WORKBUDDY_ACCOUNTS", "").strip()
+    #raw = os.environ.get("WORKBUDDY_ACCOUNTS", "").strip()
+    raw = os.getenv("WORKBUDDY_ACCOUNTS").strip()
     if raw:
         try:
             return json.loads(raw).get("accounts", [])
@@ -92,6 +93,7 @@ def do_checkin(acct):
             json={},
             timeout=25,
         )
+        #print(resp)
     except Exception as e:  # noqa: BLE001
         return "failed", "网络错误: %s" % e
     return classify(resp)
@@ -109,13 +111,14 @@ def push(title, content):
             )
         except Exception:  # noqa: BLE001
             pass
-    key = os.environ.get("SERVERCHAN_KEY")
+    #key = os.environ.get("SERVERCHAN_KEY")
+    key = os.getenv("SERVERCHAN_KEY").strip()
     if key:
         try:
             requests.post(
                 "https://sctapi.ftqq.com/%s.send" % key,
                 data={"title": title, "desp": content},
-                timeout=15,
+                timeout=150,
             )
         except Exception:  # noqa: BLE001
             pass
