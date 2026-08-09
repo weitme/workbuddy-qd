@@ -119,13 +119,15 @@ def push(title, content):
             )
         except Exception:  # noqa: BLE001
             pass
-def mask(name):  
-    """脱敏账号名，避免在公开的 Actions 日志里暴露手机号。"""  
-    s = str(name)  
-    if len(s) == 11 and s.isdigit():  
-        return s[:3] + "\*\*\*\*" + s[7:]  
-    if len(s) > 4:  
-        return s[:2] + "\*\*\*" + s[-2:]  
+
+
+def mask(name):
+    """脱敏账号名，避免在公开的 Actions 日志里暴露手机号。"""
+    s = str(name)
+    if len(s) == 11 and s.isdigit():
+        return s[:3] + "****" + s[7:]
+    if len(s) > 4:
+        return s[:2] + "***" + s[-2:]
     return s
 
 
@@ -143,12 +145,9 @@ def main():
         status, detail = do_checkin(acct)
         summary[status] += 1
         icon = {"ok": "✅", "already": "🟢", "expired": "⚠️", "failed": "❌"}[status]
-```python
         # 控制台/Actions 日志脱敏；微信推送里保留完整账号名便于识别
         print("%s %s: %s" % (icon, mask(name), detail))
         lines.append("%s %s: %s" % (icon, name, detail))
-```
-
 
     total = ("签到完成 | 成功 %d / 已签 %d / 失效 %d / 失败 %d"
              % (summary["ok"], summary["already"], summary["expired"], summary["failed"]))
