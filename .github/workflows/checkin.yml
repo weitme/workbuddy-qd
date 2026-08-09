@@ -1,20 +1,11 @@
 name: WorkBuddy 每日自动签到
 
+# 触发方式：只保留手动/API 触发（workflow_dispatch）
+# 定时由宝塔计划任务调用 GitHub API 来踢，不依赖 GitHub 自带 cron
 on:
-  # 手动触发（调试用）
   workflow_dispatch:
 
-  # 定时触发：GitHub 使用 UTC 时间，北京时间 = UTC + 8
-  # 重要：GitHub cron 是 best-effort，可能延迟甚至丢弃单次运行。
-  # 因为 checkin.py 对「今天已签到」是幂等的（接口返回 code 10001，不会重复签），
-  # 所以多设几个时段完全无副作用，只要有一次跑通当天就成功。
-  schedule:
-    - cron: '47 4 * * *'    # UTC 06:09 = 北京 12:47  主签到
-    - cron: '8 5 * * *'     # UTC 06:10 = 北京 13:08  复查
-    - cron: '17 6 * * *'    # UTC 06:11 = 北京 14:17  兜底 1
-
-
-# 避免多个时段撞车时并发跑
+# 防止宝塔两次触发（12:47 / 13:08）重叠运行
 concurrency:
   group: workbuddy-checkin
   cancel-in-progress: false
@@ -24,10 +15,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: 检出代码
+      - name: 拉取代码
         uses: actions/checkout@v5
 
-      - name: 设置 Python
+      - name: 配置 Python
         uses: actions/setup-python@v6
         with:
           python-version: '3.11'
@@ -38,7 +29,6 @@ jobs:
       - name: 打印触发信息
         run: |
           echo "触发方式: ${{ github.event_name }}"
-          echo "UTC 时间 : $(date -u '+%Y-%m-%d %H:%M:%S')"
           echo "北京时间 : $(TZ=Asia/Shanghai date '+%Y-%m-%d %H:%M:%S')"
 
       - name: 执行签到
