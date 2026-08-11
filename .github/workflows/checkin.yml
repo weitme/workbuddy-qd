@@ -1,41 +1,75 @@
+# 工作流名称：在 GitHub Actions 界面中显示的名称
 name: WorkBuddy 每日自动签到
+
+# 定义工作流的触发条件
 on:
-# 触发方式：只保留手动/API 触发（workflow_dispatch）
-# 定时由宝塔计划任务调用 GitHub API 来踢，不依赖 GitHub 自带 cron
+  # 触发方式说明：目前只保留手动触发（workflow_dispatch）和定时触发（schedule）
+  # 定时任务实际由宝塔面板通过调用 GitHub API 来触发，而非依赖 GitHub 自带的 cron 调度
+  # 这里保留 schedule 作为备用触发方式
   schedule:
-    - cron: '0 1 * * *'   # 北京时间 09:00 (UTC+8 -> UTC+1)
-    - cron: '0 5 * * *'   # 北京时间 13:00 (UTC+8 -> UTC+5)
+    # 第一个定时任务：每天 UTC 时间 01:00 执行（对应北京时间 09:00）
+    # 注意：UTC+8 时区转换为 UTC 需要减去 8 小时
+    - cron: '0 1 * * *'   # UTC 01:00 = 北京时间 09:00
+    # 第二个定时任务：每天 UTC 时间 05:00 执行（对应北京时间 13:00）
+    - cron: '0 5 * * *'   # UTC 05:00 = 北京时间 13:00
+  # 手动触发方式：允许在 GitHub Actions 界面点击按钮手动运行
   workflow_dispatch:
 
-# 防止宝塔两次触发（12:47 / 13:08）重叠运行
+# 并发控制配置：防止多个工作流实例同时运行
+# 避免宝塔面板在不同时间点（如 12:47 和 13:08）多次触发导致重叠执行
 concurrency:
+  # 并发组名称：相同组内的工作流会受并发规则限制
   group: workbuddy-checkin
+  # 是否取消正在运行中的实例：false 表示允许新实例排队等待，不取消当前正在运行的实例
   cancel-in-progress: false
 
+# 定义工作流的作业（job）
 jobs:
+  # 作业名称：签到任务
   checkin:
+    # 运行环境：使用最新版的 Ubuntu Linux 作为执行环境
     runs-on: ubuntu-latest
+    # 超时时间：作业最长运行 10 分钟，超时则自动终止
     timeout-minutes: 10
+    # 作业的步骤列表
     steps:
+      # 步骤1：拉取代码仓库
       - name: 拉取代码
+        # 使用官方 checkout action 的 v5 版本，将代码下载到运行环境中
         uses: actions/checkout@v5
 
+      # 步骤2：配置 Python 运行环境
       - name: 配置 Python
+        # 使用官方 setup-python action 的 v6 版本
         uses: actions/setup-python@v6
+        # 传入参数
         with:
+          # 指定安装 Python 3.11 版本
           python-version: '3.11'
 
+      # 步骤3：安装项目依赖
       - name: 安装依赖
+        # 运行 shell 命令：使用 pip 安装 requirements.txt 中列出的 Python 包
         run: pip install -r requirements.txt
 
+      # 步骤4：打印触发信息（用于调试和日志记录）
       - name: 打印触发信息
+        # 运行多条 shell 命令
         run: |
+          # 输出本次工作流的触发方式（如 schedule、workflow_dispatch 等）
           echo "触发方式: ${{ github.event_name }}"
+          # 使用 TZ 环境变量设置时区为 Asia/Shanghai，显示当前北京时间
           echo "北京时间 : $(TZ=Asia/Shanghai date '+%Y-%m-%d %H:%M:%S')"
 
+      # 步骤5：执行签到主程序
       - name: 执行签到
+        # 设置环境变量，供 Python 脚本读取
         env:
+          # 从 GitHub Secrets 中读取 WorkBuddy 账号配置（JSON 格式，支持多账号）
           WORKBUDDY_ACCOUNTS: ${{ secrets.WORKBUDDY_ACCOUNTS }}
+          # 从 GitHub Secrets 中读取 PushPlus 推送 token（用于微信推送）
           PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
+          # 从 GitHub Secrets 中读取 Server酱（ServerChan）推送 key（用于微信推送）
           SERVERCHAN_KEY: ${{ secrets.SERVERCHAN_KEY }}
+        # 运行 Python 签到脚本
         run: python checkin.py
