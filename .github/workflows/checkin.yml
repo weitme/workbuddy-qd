@@ -1,4 +1,7 @@
 name: WorkBuddy 每日自动签到
+  schedule:
+    - cron: '0 1 * * *'   # 北京时间 09:00 (UTC+8 -> UTC+1)
+    - cron: '0 5 * * *'   # 北京时间 13:00 (UTC+8 -> UTC+5)
 
 # 触发方式：只保留手动/API 触发（workflow_dispatch）
 # 定时由宝塔计划任务调用 GitHub API 来踢，不依赖 GitHub 自带 cron
