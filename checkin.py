@@ -156,8 +156,9 @@ def main():
              % (summary["ok"], summary["already"], summary["expired"], summary["failed"]))
     print(total)
     lines.append(total)
-    push("WorkBuddy 签到", "\n".join(lines))
-
+    """push("WorkBuddy 签到", "\n".join(lines))"""
+    push(lines, "\n".join(lines))
+  
 
 if __name__ == "__main__":
     main()
