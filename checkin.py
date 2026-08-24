@@ -154,7 +154,7 @@ def main():
 
     total = ("签到完成 | 成功 %d / 已签 %d / 失效 %d / 失败 %d"
              % (summary["ok"], summary["already"], summary["expired"], summary["failed"]))
-    title = ("成功 %d / 已签 %d / 失效 %d / 失败 %d"
+    title = ("成功%d 已签%d 失效%d 失败 %d"
              % (summary["ok"], summary["already"], summary["expired"], summary["failed"]))
     print(total)
     lines.append(total)
