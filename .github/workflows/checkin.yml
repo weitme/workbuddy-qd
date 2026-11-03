@@ -1,4 +1,4 @@
-# 工作流名称：在 GitHub Actions 界面中显示的名称
+# 工作流名称：在 GitHub Actions 界面中显示的名称1
 name: WorkBuddy 每日自动签到
 
 # 定义工作流的触发条件
